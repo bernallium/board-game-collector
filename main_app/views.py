@@ -1,5 +1,4 @@
 from django.shortcuts import render
-from django.http import HttpResponse
 
 class Game: 
     def __init__(self, name, category, rating, age, min_players, max_players, description):
@@ -21,7 +20,7 @@ games = [
 ]
 
 def home(request):
-    return HttpResponse('<h1>Hello /ᐠ｡‸｡ᐟ\ﾉ</h1>')
+    return render(request, 'home.html')
 
 def about(request):
     return render(request, 'about.html')
