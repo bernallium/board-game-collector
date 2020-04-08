@@ -26,8 +26,10 @@ class Game(models.Model):
 
 # Add new Feeding model below Cat model
 class Session(models.Model):
-    date = models.DateField()
+    
+    date = models.DateField('Date played') # The first optional positional argument overrides the label
     enjoyment = models.CharField(
+        'Enjoyment level',
         max_length=1, # Use just a single character to represent the level of enjoyment (low, medium, high)
         choices=ENJOYMENT_LEVEL, 
         default=ENJOYMENT_LEVEL[0][1], # Default to medium level of enjoyment
@@ -38,4 +40,4 @@ class Session(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE) # Django autmatically renames the FK as game_id in the database
 
     def __str__(self):
-        return f"The game played on {self.date} was has a {self.get_enjoment_display()} level of enjoyment"
+        return f"The game played on {self.date} had a {self.get_enjoyment_display()} level of enjoyment"

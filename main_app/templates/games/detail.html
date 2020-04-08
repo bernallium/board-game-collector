@@ -3,18 +3,38 @@
 
 <h1>Board Game Details</h1>
 
-<div class="card">
-    <div class="card-content">
-        <span class="card-title">{{ game.name }}</span>
-        <p>Rating: {{ game.rating }}</p>
-        <p>Category: {{ game.category }}</p>
-        <p>Age: {{ game.age }}+</p>
-        <p>Players: {{ game.min_players }} - {{ game.max_players }}</p>
-        <p>{{ game.description }}</p>
+<div class="row">
+    <div class="col s6">
+        <div class="card">
+            <div class="card-content">
+                <span class="card-title">{{ game.name }}</span>
+                <p>Rating: {{ game.rating }}</p>
+                <p>Category: {{ game.category }}</p>
+                <p>Age: {{ game.age }}+</p>
+                <p>Players: {{ game.min_players }} - {{ game.max_players }}</p>
+                <p>{{ game.description }}</p>
+            </div>
+            <div class="card-action">
+                <a href="{% url 'games_update' game.id %}">Edit</a>
+                <a href="{% url 'games_delete' game.id %}">Delete</a>
+            </div>
+        </div>
     </div>
-    <div class="card-action">
-        <a href="{% url 'games_update' game.id %}">Edit</a>
-        <a href="{% url 'games_delete' game.id %}">Delete</a>
+    <div class="col s6">
+        <table class="striped">
+            <thead>
+                <tr><th>Date</th><th>Enjoyment Level</th><th>Winner</th></tr>
+            </thead>
+            <tbody>
+                {% for session in game.session_set.all %}
+                    <tr>
+                        <td>{{session.date}}</td>
+                        <td>{{session.get_enjoyment_display}}</td>
+                        <td>{{session.winner}}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 
