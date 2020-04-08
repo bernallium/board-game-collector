@@ -1,5 +1,6 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from .models import Game
+from .forms import SessionForm
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
 # class Game: 
@@ -31,13 +32,31 @@ def games_index(request):
     games = Game.objects.all() # Get all the games
     return render(request, 'games/index.html', { 'games': games })
 
+# def games_detail(request, game_id):
+#     game = Game.objects.get(id=game_id)
+#     return render(request, 'games/detail.html', { 'game': game })
+
 def games_detail(request, game_id):
     game = Game.objects.get(id=game_id)
-    return render(request, 'games/detail.html', { 'game': game })
+    session_form = SessionForm()
+    return render(request, 'games/detail.html', {
+        'game': game, 'session_form': session_form, # Include the game and session_form in the context
+        })
+
+def add_session(request, game_id):
+    # Create the ModelForm using the data in request.POST
+    form = SessionForm(request.POST)
+    # Validate the form
+    if form.is_valid():
+        # Don't save the form to the db until it has the game_id assigned
+        new_session = form.save(commit=False)
+        new_session.game_id = game_id
+        new_session.save()
+    return redirect('detail', game_id=game_id) # Always be sure to redirect instead of render if data has been changed in the database.
 
 class GameCreate(CreateView):
     model = Game
-    fields = '__all__' # alternatively: fields = ['name', 'breed', 'description', 'age']
+    fields = '__all__' # Alternatively: fields = ['name', 'breed', 'description', 'age']
     success_url = '/games/' # Redirect URL
 
 class GameUpdate(UpdateView):
