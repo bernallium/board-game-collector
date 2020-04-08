@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from .models import Game
-from django.views.generic.edit import CreateView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
 # class Game: 
 #     def __init__(self, name, category, rating, age, min_players, max_players, description):
@@ -39,3 +39,11 @@ class GameCreate(CreateView):
     model = Game
     fields = '__all__' # alternatively: fields = ['name', 'breed', 'description', 'age']
     success_url = '/games/' # Redirect URL
+
+class GameUpdate(UpdateView):
+    model = Game
+    fields = ['rating', 'category', 'description']
+
+class GameDelete(DeleteView):
+    model = Game
+    success_url = '/games/'
