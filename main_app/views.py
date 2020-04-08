@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from .models import Game
+from django.views.generic.edit import CreateView
 
 # class Game: 
 #     def __init__(self, name, category, rating, age, min_players, max_players, description):
@@ -33,3 +34,8 @@ def games_index(request):
 def games_detail(request, game_id):
     game = Game.objects.get(id=game_id)
     return render(request, 'games/detail.html', { 'game': game })
+
+class GameCreate(CreateView):
+    model = Game
+    fields = '__all__' # alternatively: fields = ['name', 'breed', 'description', 'age']
+    success_url = '/games/' # Redirect URL
