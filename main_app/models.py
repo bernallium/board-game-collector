@@ -1,5 +1,6 @@
 from django.db import models
 from django.urls import reverse
+from django.contrib.auth.models import User
 
 # The first item in each 2-tuple represents the value that will be stored in the database
 # The second item represents the human-friendly "display" value
@@ -17,6 +18,7 @@ class Game(models.Model):
     min_players = models.PositiveIntegerField(null=True)
     max_players = models.PositiveIntegerField(null=True)
     description = models.TextField(max_length=800)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
