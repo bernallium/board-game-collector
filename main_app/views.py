@@ -6,6 +6,9 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 import uuid
 import boto3
 
+from django.contrib.auth import login
+from django.contrib.auth.forms import UserCreationForm
+
 S3_BASE_URL = 'https://s3.us-east-2.amazonaws.com/'
 BUCKET= 'bgamecollector'
 
@@ -15,8 +18,14 @@ def home(request):
 def about(request):
     return render(request, 'about.html')
 
+# def games_index(request):
+#     games = Game.objects.all() # Get all the games (does not consider which user's games)
+#     return render(request, 'games/index.html', { 'games': games })
+
 def games_index(request):
-    games = Game.objects.all() # Get all the games
+    games = Game.objects.filter(user=request.user)
+    # You could also retrieve the logged in user's games like this
+    # games = request.user.game_set.all()
     return render(request, 'games/index.html', { 'games': games })
 
 # def games_detail(request, game_id):
@@ -65,10 +74,18 @@ def add_photo(request, game_id):
             print('An error occurred uploading file to S3')
     return redirect('detail', game_id=game_id)
 
-class GameCreate(CreateView):
+class GameCreate(CreateView): # GameCreate inherits from CreateView
     model = Game
     fields = '__all__' # Alternatively: fields = ['name', 'breed', 'description', 'age']
     success_url = '/games/' # Redirect URL
+
+    # form_valid is an inherited method from CreateView called when a valid game form is being submitted
+    def form_valid(self, form):
+        # Assign the logged in user (self.request.user)
+        form.instance.user = self.request.user  # Assign the currently logged in user to the current game instance (form.instance is the game)
+        # NOTE: the game instance has not been saved to the database yet
+        # Let the CreateView do its job as usual so that the form is saved upon validation
+        return super().form_valid(form)
 
 class GameUpdate(UpdateView):
     model = Game
@@ -78,3 +95,19 @@ class GameUpdate(UpdateView):
 class GameDelete(DeleteView):
     model = Game
     success_url = '/games/'
+
+def signup(request):
+    error_message = ''
+    if request.method == 'POST':
+        # This is how to create a 'user' form object that includes the data from the browser
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save() # Add the user to the database
+            login(request, user) # Log a user in via code
+            return redirect('index')
+        else:
+            error_message = 'Invalid sign up - try again'
+    # A bad POST or a GET request, so render signup.html with an empty form
+    form = UserCreationForm()
+    context = {'form': form, 'error_message': error_message}
+    return render(request, 'registration/signup.html', context)

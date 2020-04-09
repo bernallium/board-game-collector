@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import home, about, games_index, games_detail, GameCreate, GameUpdate, GameDelete, add_session, add_photo
+from .views import home, about, games_index, games_detail, GameCreate, GameUpdate, GameDelete, add_session, add_photo, signup
 
 urlpatterns = [
     path('', home, name='home'),
@@ -11,4 +11,6 @@ urlpatterns = [
     path('games/<int:pk>/delete/', GameDelete.as_view(), name='games_delete'),
     path('games/<int:game_id>/add_session/', add_session, name='add_session'),
     path('games/<int:game_id>/add_photo/', add_photo, name='add_photo'),
+
+    path('accounts/signup/', signup, name='signup'),
 ]
