@@ -24,15 +24,13 @@ class Game(models.Model):
     def get_absolute_url(self):
         return reverse('detail', kwargs={'game_id': self.id})
 
-# Add new Feeding model below Cat model
 class Session(models.Model):
-    
-    date = models.DateField('Date played') # The first optional positional argument overrides the label
+    date = models.DateField()
     enjoyment = models.CharField(
-        'Enjoyment level',
+        'Enjoyment level', # The first optional positional argument overrides the label
         max_length=1, # Use just a single character to represent the level of enjoyment (low, medium, high)
         choices=ENJOYMENT_LEVEL, 
-        default=ENJOYMENT_LEVEL[0][1], # Default to medium level of enjoyment
+        default=ENJOYMENT_LEVEL[1][0], # Default to medium level of enjoyment
         )
     winner = models.CharField(max_length=100)
 
@@ -41,6 +39,10 @@ class Session(models.Model):
 
     def __str__(self):
         return f"The game played on {self.date} had a {self.get_enjoyment_display()} level of enjoyment"
+
+    # Sort from most most recent to old
+    class Meta:
+        ordering = ['-date']
 
 class Photo(models.Model):
     url = models.CharField(max_length=200)
