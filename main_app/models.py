@@ -41,3 +41,10 @@ class Session(models.Model):
 
     def __str__(self):
         return f"The game played on {self.date} had a {self.get_enjoyment_display()} level of enjoyment"
+
+class Photo(models.Model):
+    url = models.CharField(max_length=200)
+    game = models.ForeignKey(Game, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Photo for game_id: {self.game_id} @{self.url}"

@@ -1,26 +1,13 @@
 from django.shortcuts import render, redirect
-from .models import Game
+from .models import Game, Photo
 from .forms import SessionForm
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
-# class Game: 
-#     def __init__(self, name, category, rating, age, min_players, max_players, description):
-#         self.name = name
-#         self.category = category
-#         self.rating = rating
-#         self.age = age
-#         self.min_players = min_players
-#         self.max_players = max_players
-#         self.description = description
+import uuid
+import boto3
 
-# games = [
-#     Game('Catan', 'Strategy', 8.5, 10, 3, 4, 
-#     'In Catan, players try to be the dominant force on the island of Catan by building settlements, cities, and roads. On each turn dice are rolled to determine what resources the island produces. Players collect these resources (cards)—wood, grain, brick, sheep, or stone—to build up their civilizations to get to 10 victory points and win the game.'),
-#     Game('Saboteur', 'Party', 7.2, 8, 3, 10, 
-#     'Players take on the role of dwarves. As miners, they are in a mine, hunting for gold. Suddenly, a pick axe swings down and shatters the mine lamp. The saboteur has struck. But which of the players are saboteurs? Will you find the gold, or will the fiendish actions of the saboteurs lead them to it first? After three rounds, the player with the most gold is the winner.'),
-#     Game('The Resistance', 'Party', 9, 13, 5, 10,
-#     'The Resistance is a party game of social deduction. It is designed for five to ten players, lasts about 30 minutes, and has no player elimination. The Resistance is inspired by Mafia/Werewolf, yet it is unique in its core mechanics, which increase the resources for informed decisions, intensify player interaction, and eliminate player elimination.'),
-# ]
+S3_BASE_URL = 'https://s3.us-east-2.amazonaws.com/'
+BUCKET= 'bgamecollector'
 
 def home(request):
     return render(request, 'home.html')
@@ -54,6 +41,30 @@ def add_session(request, game_id):
         new_session.save()
     return redirect('detail', game_id=game_id) # Always be sure to redirect instead of render if data has been changed in the database.
 
+def add_photo(request, game_id):
+    # photo-file will be the "name" attribute on the <input type="file">
+    photo_file = request.FILES.get('photo-file', None)
+    if photo_file:
+        s3 = boto3.client('s3')
+        # Need a unique "key" for S3 / needs image file extension too
+        key = uuid.uuid4().hex[:6] + photo_file.name[photo_file.name.rfind('.'):] # Create 6 random characters and then attach the file name without the file extension
+        # Alternatively could make your key a path
+        # This creates uniqe folder names with your photo inside
+        # key = uuid.uuid4().hex[:6] + '/' + photo_file.name
+        
+        # Just in case something goes wrong
+        try:
+            s3.upload_fileobj(photo_file, BUCKET, key)
+            # Build the full url string (needs to be unique to avoid overwriting existing files)
+            url = f"{S3_BASE_URL}{BUCKET}/{key}"
+            # Can assign to game_id or game (if you have a game object)
+            photo = Photo(url=url, game_id=game_id)
+            photo.save()
+        except Exception as e:
+            print(e)
+            print('An error occurred uploading file to S3')
+    return redirect('detail', game_id=game_id)
+
 class GameCreate(CreateView):
     model = Game
     fields = '__all__' # Alternatively: fields = ['name', 'breed', 'description', 'age']
@@ -62,6 +73,7 @@ class GameCreate(CreateView):
 class GameUpdate(UpdateView):
     model = Game
     fields = ['rating', 'category', 'description']
+    # TODO: Need rediect here?
 
 class GameDelete(DeleteView):
     model = Game
