@@ -81,7 +81,8 @@ def add_photo(request, game_id):
 
 class GameCreate(LoginRequiredMixin, CreateView): # GameCreate inherits from CreateView
     model = Game
-    fields = '__all__' # Alternatively: fields = ['name', 'breed', 'description', 'age']
+    # fields = '__all__' # Need to not include user
+    fields = ['name', 'rating', 'category', 'age', 'min_players', 'max_players', 'description']
     success_url = '/games/' # Redirect URL
 
     # form_valid is an inherited method from CreateView called when a valid game form is being submitted
