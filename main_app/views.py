@@ -57,6 +57,7 @@ def add_session(request, game_id):
         new_session.save()
     return redirect('detail', game_id=game_id) # Always be sure to redirect instead of render if data has been changed in the database.
 
+@login_required
 def assoc_label(request, game_id, label_id):
     # Note that you can pass a labels's id instead of the whole object
     Game.objects.get(id=game_id).labels.add(label_id)
@@ -126,20 +127,20 @@ def signup(request):
     context = {'form': form, 'error_message': error_message}
     return render(request, 'registration/signup.html', context)
 
-class LabelList(ListView):
+class LabelList(LoginRequiredMixin, ListView):
     model = Label
 
-class LabelDetail(DetailView):
+class LabelDetail(LoginRequiredMixin, DetailView):
     model = Label
 
-class LabelCreate(CreateView):
+class LabelCreate(LoginRequiredMixin, CreateView):
     model = Label
     fields = '__all__'
 
-class LabelUpdate(UpdateView):
+class LabelUpdate(LoginRequiredMixin, UpdateView):
     model = Label
     fields = ['name']
 
-class LabelDelete(DeleteView):
+class LabelDelete(LoginRequiredMixin, DeleteView):
     model = Label
-    success_url = '/toys/'
+    success_url = '/labels/'
