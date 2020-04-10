@@ -38,9 +38,11 @@ def games_index(request):
 @login_required
 def games_detail(request, game_id):
     game = Game.objects.get(id=game_id)
+    labels_game_doesnt_have = Label.objects.exclude(id__in = game.labels.all().values_list('id'))
     session_form = SessionForm()
     return render(request, 'games/detail.html', {
         'game': game, 'session_form': session_form, # Include the game and session_form in the context
+        'labels': labels_game_doesnt_have, # Add the toys to be displayed
         })
 
 @login_required
@@ -54,6 +56,11 @@ def add_session(request, game_id):
         new_session.game_id = game_id
         new_session.save()
     return redirect('detail', game_id=game_id) # Always be sure to redirect instead of render if data has been changed in the database.
+
+def assoc_label(request, game_id, label_id):
+    # Note that you can pass a labels's id instead of the whole object
+    Game.objects.get(id=game_id).labels.add(label_id)
+    return redirect('detail', game_id=game_id)
 
 @login_required
 def add_photo(request, game_id):
