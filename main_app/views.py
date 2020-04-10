@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect
 from .models import Game, Photo
 from .forms import SessionForm
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 import uuid
 import boto3
@@ -32,6 +34,7 @@ def games_index(request):
 #     game = Game.objects.get(id=game_id)
 #     return render(request, 'games/detail.html', { 'game': game })
 
+@login_required
 def games_detail(request, game_id):
     game = Game.objects.get(id=game_id)
     session_form = SessionForm()
@@ -39,6 +42,7 @@ def games_detail(request, game_id):
         'game': game, 'session_form': session_form, # Include the game and session_form in the context
         })
 
+@login_required
 def add_session(request, game_id):
     # Create the ModelForm using the data in request.POST
     form = SessionForm(request.POST)
@@ -50,6 +54,7 @@ def add_session(request, game_id):
         new_session.save()
     return redirect('detail', game_id=game_id) # Always be sure to redirect instead of render if data has been changed in the database.
 
+@login_required
 def add_photo(request, game_id):
     # photo-file will be the "name" attribute on the <input type="file">
     photo_file = request.FILES.get('photo-file', None)
@@ -74,7 +79,7 @@ def add_photo(request, game_id):
             print('An error occurred uploading file to S3')
     return redirect('detail', game_id=game_id)
 
-class GameCreate(CreateView): # GameCreate inherits from CreateView
+class GameCreate(LoginRequiredMixin, CreateView): # GameCreate inherits from CreateView
     model = Game
     fields = '__all__' # Alternatively: fields = ['name', 'breed', 'description', 'age']
     success_url = '/games/' # Redirect URL
@@ -87,12 +92,12 @@ class GameCreate(CreateView): # GameCreate inherits from CreateView
         # Let the CreateView do its job as usual so that the form is saved upon validation
         return super().form_valid(form)
 
-class GameUpdate(UpdateView):
+class GameUpdate(LoginRequiredMixin, UpdateView):
     model = Game
     fields = ['rating', 'category', 'description']
     # TODO: Need rediect here?
 
-class GameDelete(DeleteView):
+class GameDelete(LoginRequiredMixin, DeleteView):
     model = Game
     success_url = '/games/'
 
