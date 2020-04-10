@@ -10,6 +10,15 @@ ENJOYMENT_LEVEL = (
     ('h', 'High'),
 )
 
+class Label(models.Model):
+    name = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        return reverse('labels_detail', kwargs={'pk': self.id})
+
 class Game(models.Model):
     name = models.CharField(max_length=100)
     rating = models.DecimalField(max_digits=3, decimal_places=1, null=True)
@@ -18,7 +27,8 @@ class Game(models.Model):
     min_players = models.PositiveIntegerField(null=True)
     max_players = models.PositiveIntegerField(null=True)
     description = models.TextField(max_length=800)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    labels = models.ManyToManyField(Label)
+    user = models.ForeignKey(User, on_delete=models.CASCADE) # 1:M
 
     def __str__(self):
         return self.name

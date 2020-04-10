@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect
-from .models import Game, Photo
+from .models import Game, Label, Photo
 from .forms import SessionForm
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import ListView, DetailView
 
 import uuid
 import boto3
@@ -117,3 +118,21 @@ def signup(request):
     form = UserCreationForm()
     context = {'form': form, 'error_message': error_message}
     return render(request, 'registration/signup.html', context)
+
+class LabelList(ListView):
+    model = Label
+
+class LabelDetail(DetailView):
+    model = Label
+
+class LabelCreate(CreateView):
+    model = Label
+    fields = '__all__'
+
+class LabelUpdate(UpdateView):
+    model = Label
+    fields = ['name']
+
+class LabelDelete(DeleteView):
+    model = Label
+    success_url = '/toys/'
